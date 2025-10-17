@@ -36,7 +36,7 @@
         }
       }
     },
-    "/api/Dashboard/summary": {
+    "/api/dashboard/summary": {
       "get": {
         "tags": [
           "Dashboard"
@@ -48,20 +48,183 @@
         }
       }
     },
-    "/api/files/view": {
+    "/api/dashboard/incidents": {
       "get": {
         "tags": [
-          "FileViewer"
+          "Dashboard"
         ],
         "parameters": [
           {
-            "name": "path",
+            "name": "pageNumber",
             "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/dashboard/incidents/{id}": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/dashboard/maps/attack-origins": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/dashboard/security/profiles": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/dashboard/security/block-ip": {
+      "post": {
+        "tags": [
+          "Dashboard"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockIpRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockIpRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockIpRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/dashboard/security/unblock-ip/{ipAddress}": {
+      "delete": {
+        "tags": [
+          "Dashboard"
+        ],
+        "parameters": [
+          {
+            "name": "ipAddress",
+            "in": "path",
+            "required": true,
             "schema": {
               "type": "string"
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/files/upload-profile-picture": {
+      "post": {
+        "tags": [
+          "FileUpload"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "file": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -93,6 +256,24 @@
   },
   "components": {
     "schemas": {
+      "BlockIpRequest": {
+        "type": "object",
+        "properties": {
+          "ipAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "durationInHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "LoginRequest": {
         "type": "object",
         "properties": {

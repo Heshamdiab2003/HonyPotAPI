@@ -1,1 +1,2 @@
 wwwroot\Finger.html
+wwwroot\honeypot-tester.html

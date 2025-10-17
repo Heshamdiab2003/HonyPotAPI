@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HoneyBot")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2381fc82cd63ba6187e1b00555b7414226b84663")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9b739f6561e26c16d6e01067c71d33ec3d03bb3e")]
 [assembly: System.Reflection.AssemblyProductAttribute("HoneyBot")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HoneyBot")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -17,8 +17,45 @@
   },
   {
     "ContainingType": "HoneyBot.Controllers.DashboardController",
-    "Method": "GetDashboardSummary",
-    "RelativePath": "api/Dashboard/summary",
+    "Method": "GetIncidents",
+    "RelativePath": "api/dashboard/incidents",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "pageNumber",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HoneyBot.Controllers.DashboardController",
+    "Method": "GetIncidentById",
+    "RelativePath": "api/dashboard/incidents/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HoneyBot.Controllers.DashboardController",
+    "Method": "GetAttackOrigins",
+    "RelativePath": "api/dashboard/maps/attack-origins",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -26,16 +63,79 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "HoneyBot.Controllers.FileViewerController",
-    "Method": "ViewFile",
-    "RelativePath": "api/files/view",
+    "ContainingType": "HoneyBot.Controllers.DashboardController",
+    "Method": "BlockIp",
+    "RelativePath": "api/dashboard/security/block-ip",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "HoneyBot.Dtos.BlockIpRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HoneyBot.Controllers.DashboardController",
+    "Method": "GetSecurityProfiles",
+    "RelativePath": "api/dashboard/security/profiles",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "path",
+        "Name": "pageNumber",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HoneyBot.Controllers.DashboardController",
+    "Method": "UnblockIp",
+    "RelativePath": "api/dashboard/security/unblock-ip/{ipAddress}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ipAddress",
         "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HoneyBot.Controllers.DashboardController",
+    "Method": "GetDashboardSummary",
+    "RelativePath": "api/dashboard/summary",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HoneyBot.Controllers.FileUploadController",
+    "Method": "UploadProfilePicture",
+    "RelativePath": "api/files/upload-profile-picture",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "file",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
         "IsRequired": false
       }
     ],

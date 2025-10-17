@@ -1,0 +1,208 @@
+﻿
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HonyBot - Comprehensive Tester</title>
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-top: 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+            button:disabled {
+                background-color: #cccccc;
+                cursor: not-allowed;
+            }
+
+        #response-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            word-break: break-word;
+        }
+
+        .blocked {
+            color: #dc3545;
+            font-size: 18px;
+            border: 1px solid #dc3545;
+            background-color: #f8d7da;
+        }
+
+        .error {
+            color: #dc3545;
+            border: 1px solid #dc3545;
+            background-color: #f8d7da;
+        }
+
+        .success {
+            color: #155724;
+            border: 1px solid #155724;
+            background-color: #d4edda;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="card">
+            <h2>API Response</h2>
+            <div id="response-area">Waiting for an action...</div>
+        </div>
+        <div class="card" id="login-card">
+            <h2>Test: Brute-force & Login</h2>
+            <form id="login-form">
+                <input type="email" name="email" value="student@test.com" required>
+                <input type="password" name="password" value="wrongpassword" required>
+                <button type="submit">Attempt Login</button>
+            </form>
+        </div>
+        <div class="card" id="search-card">
+            <h2>Test: SQL Injection & XSS</h2>
+            <form id="search-form">
+                <input type="text" name="q" value="' OR '1'='1' --" required>
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        <div class="card" id="upload-card">
+            <h2>Test: Malicious File Upload</h2>
+            <form id="upload-form">
+                <input type="file" name="file" required>
+                <button type="submit">Upload File</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        const BASE_URL = 'https://localhost:7194';
+        const API_ENDPOINTS = {
+            login: `${BASE_URL}/api/auth/login`,
+            search: `${BASE_URL}/api/search`,
+            upload: `${BASE_URL}/api/files/upload-profile-picture`,
+        };
+        const fpPromise = FingerprintJS.load();
+        const responseArea = document.getElementById('response-area');
+        let visitorId = null;
+
+        async function getVisitorId() {
+            if (visitorId) return visitorId;
+            const fp = await fpPromise;
+            const result = await fp.get();
+            visitorId = result.visitorId;
+            console.log('Fingerprint ID:', visitorId);
+            return visitorId;
+        }
+
+        function displayResponse(status, message) {
+            responseArea.textContent = message;
+            if (status === 403) {
+                responseArea.className = 'blocked';
+                document.querySelectorAll('button').forEach(btn => btn.disabled = true);
+                document.querySelectorAll('input').forEach(inp => inp.disabled = true);
+            } else if (status >= 400) {
+                responseArea.className = 'error';
+            } else {
+                responseArea.className = 'success';
+            }
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fingerprint = await getVisitorId();
+            const data = Object.fromEntries(new FormData(e.target).entries());
+            try {
+                const response = await fetch(API_ENDPOINTS.login, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Visitor-ID': fingerprint },
+                    body: JSON.stringify(data)
+                });
+                const responseData = response.status === 403 ? { message: 'Access Denied' } : await response.json();
+                displayResponse(response.status, `[Login] ${responseData.message}`);
+            } catch (error) { displayResponse(500, 'Network Error'); }
+        });
+
+        document.getElementById('search-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fingerprint = await getVisitorId();
+            const query = e.target.elements['q'].value;
+            const url = new URL(API_ENDPOINTS.search);
+            url.searchParams.append('q', query);
+            console.log(`[DEBUG] Sending Search request to: ${url}`);
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: { 'X-Visitor-ID': fingerprint }
+                });
+                const responseData = response.status === 403 ? { message: 'Access Denied' } : await response.json();
+                displayResponse(response.status, `[Search] Completed. Found ${responseData.results_count || 0} items.`);
+            } catch (error) { displayResponse(500, 'Network Error'); }
+        });
+
+        // File upload form
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fingerprint = await getVisitorId();
+            const formData = new FormData(e.target);
+            console.log(`[DEBUG] Sending Upload request to: ${API_ENDPOINTS.upload}`);
+            try {
+                const response = await fetch(API_ENDPOINTS.upload, {
+                    method: 'POST',
+                    headers: { 'X-Visitor-ID': fingerprint }, // let browser set multipart boundary
+                    body: formData
+                });
+                const responseData = response.status === 403 ? { message: 'Access Denied' } : await response.json();
+                displayResponse(response.status, `[Upload] ${responseData.message}`);
+            } catch (error) { displayResponse(500, 'Network Error'); }
+        });
+
+        getVisitorId();
+    </script>
+</body>
+</html>

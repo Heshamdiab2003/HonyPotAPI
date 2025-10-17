@@ -34,6 +34,22 @@ app.UseStaticFiles(); // لخدمة أي صفحات وهمية من wwwroot
 app.MapControllers();
 
 // Database Seeding Logic...
-// (الكود كما هو)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+
+    // Ensure at least one honeypot exists for incident logging
+    if (!db.Honeypots.Any())
+    {
+        db.Honeypots.Add(new Honeypot
+        {
+            Name = "Default Honeypot",
+            UrlPath = "/",
+            CreatedAt = DateTime.UtcNow
+        });
+        db.SaveChanges();
+    }
+}
 
 app.Run();
