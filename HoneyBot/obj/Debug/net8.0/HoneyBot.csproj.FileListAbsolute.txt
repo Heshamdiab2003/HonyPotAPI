@@ -139,3 +139,5 @@ C:\Users\HESHAM\Desktop\HoneyBot\HoneyBot\obj\Debug\net8.0\HoneyBot.genruntimeco
 C:\Users\HESHAM\Desktop\HoneyBot\HoneyBot\obj\Debug\net8.0\ref\HoneyBot.dll
 C:\Users\HESHAM\Desktop\HoneyBot\HoneyBot\bin\Debug\net8.0\UAParser.dll
 C:\Users\HESHAM\Desktop\HoneyBot\HoneyBot\bin\Debug\net8.0\HoneyBot.staticwebassets.runtime.json
+C:\Users\HESHAM\Desktop\HoneyBot\HoneyBot\obj\Debug\net8.0\HoneyBot.sourcelink.json
+C:\Users\HESHAM\Desktop\HoneyBot\HoneyBot\obj\Debug\net8.0\swae.build.ex.cache

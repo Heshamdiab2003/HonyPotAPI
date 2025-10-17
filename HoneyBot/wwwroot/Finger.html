@@ -6,15 +6,78 @@
     <title>HonyBot - Login Test</title>
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
     <style>
-        body { font-family: sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-container { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 360px; }
-        h1 { text-align: center; color: #333; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 5px; color: #555; }
-        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
-        button:hover { background-color: #0056b3; }
-        #response-message { margin-top: 20px; text-align: center; font-weight: bold; }
+        body {
+            font-family: sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 360px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+            /* ==> كلاس جديد لتعطيل الزر <== */
+            button:disabled {
+                background-color: #cccccc;
+                cursor: not-allowed;
+            }
+
+        #response-message {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        /* ==> كلاس جديد لرسالة الحظر <== */
+        .blocked {
+            color: #dc3545;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
@@ -30,58 +93,59 @@
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" value="wrongpassword" required>
             </div>
-            <button type="submit">Log In</button>
+            <button type="submit" id="login-button">Log In</button>
         </form>
         <p id="response-message"></p>
     </div>
-
     <script>
-        // الرابط الخاص بنقطة نهاية تسجيل الدخول في الـ API الخاص بك
-        // !!! هام: تأكد من أن رقم الـ Port صحيح !!!
-        const LOGIN_API_URL = 'https://localhost:7194/api/auth/login'; 
+        // Your API's login endpoint URL
+        // !!! IMPORTANT: Make sure the port number is correct !!!
+        const LOGIN_API_URL = 'https://localhost:7194/api/auth/login';
 
-        // تهيئة مكتبة البصمة
         const fpPromise = FingerprintJS.load();
-        
-        // الحصول على عناصر الصفحة
+
         const loginForm = document.getElementById('login-form');
+        const loginButton = document.getElementById('login-button');
         const responseMessage = document.getElementById('response-message');
 
-        loginForm.addEventListener('submit', async function(event) {
-            // منع الإرسال التقليدي للفورم (الذي يسبب إعادة تحميل الصفحة)
+        loginForm.addEventListener('submit', async function (event) {
             event.preventDefault();
-
-            responseMessage.textContent = 'Generating fingerprint and sending request...';
+            responseMessage.textContent = 'Sending request...';
             responseMessage.style.color = 'gray';
 
             try {
-                // 3. إنشاء البصمة
                 const fp = await fpPromise;
                 const result = await fp.get();
                 const visitorId = result.visitorId;
-                
-                // عرض البصمة في الـ Console للتأكد
-                console.log('Browser Fingerprint (Visitor ID):', visitorId);
 
-                // 4. إرسال الطلب إلى الـ API مع تضمين البصمة في الـ Headers
-                const formData = new FormData(loginForm);
-                const data = Object.fromEntries(formData.entries());
+                console.log('Browser Fingerprint (Visitor ID):', visitorId);
+                const data = Object.fromEntries(new FormData(loginForm).entries());
 
                 const response = await fetch(LOGIN_API_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Visitor-ID': visitorId // <-- هذا هو الهيدر الأهم
+                        'X-Visitor-ID': visitorId
                     },
                     body: JSON.stringify(data)
                 });
-                
-                const responseData = await response.json();
 
-                // عرض رد الـ API الوهمي
+                // --- THIS IS THE NEW, SMARTER LOGIC ---
+                // 1. Check the response status code first.
+                if (response.status === 403) {
+                    // 2. If the status is 403 (Forbidden), lock down the page.
+                    responseMessage.textContent = 'ACCESS DENIED: You have been blocked.';
+                    responseMessage.className = 'blocked';
+                    loginButton.disabled = true; // Disable the button
+                    loginForm.querySelectorAll('input').forEach(input => input.disabled = true); // Disable input fields
+                    return; // Stop executing here
+                }
+
+                // If not blocked, process the response as usual.
+                const responseData = await response.json();
                 responseMessage.textContent = `API Response: ${responseData.message}`;
                 responseMessage.style.color = response.ok ? 'green' : 'red';
-                
+
             } catch (error) {
                 console.error('Error:', error);
                 responseMessage.textContent = 'An error occurred. Check the console.';
